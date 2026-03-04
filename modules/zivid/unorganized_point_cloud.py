@@ -233,3 +233,36 @@ class UnorganizedPointCloud:
 
     def __deepcopy__(self, memodict):
         return UnorganizedPointCloud(self.__impl.__deepcopy__(memodict))
+
+
+def _from_numpy_arrays(xyz, rgba=None):
+    """Construct an UnorganizedPointCloud from numpy array data.
+
+    This helper is internal and may rely on private _zivid entry-points.
+    """
+
+    xyz = numpy.asarray(xyz, dtype=numpy.float32)
+    rgba = None if rgba is None else numpy.asarray(rgba, dtype=numpy.uint8)
+
+    constructors = []
+
+    if hasattr(_zivid.UnorganizedPointCloud, "from_numpy"):
+        constructors.append(lambda: _zivid.UnorganizedPointCloud.from_numpy(xyz, rgba))
+
+    constructors.append(
+        lambda: _zivid.UnorganizedPointCloud(xyz, rgba) if rgba is not None else _zivid.UnorganizedPointCloud(xyz)
+    )
+
+    if hasattr(_zivid, "unorganized_point_cloud_from_numpy"):
+        constructors.append(lambda: _zivid.unorganized_point_cloud_from_numpy(xyz, rgba))
+
+    for constructor in constructors:
+        try:
+            return UnorganizedPointCloud(constructor())
+        except (TypeError, AttributeError):
+            pass
+
+    raise RuntimeError(
+        "This zivid build does not support creating UnorganizedPointCloud from numpy arrays. "
+        "Please update to a build with numpy-array bridge support."
+    )
