@@ -162,6 +162,48 @@ Basic example programs can be found in the [samples](samples) directory.
 Many more advanced example programs may be found in the separate
 [zivid-python-samples](https://github.com/zivid/zivid-python-samples) repository.
 
+### Point Cloud Stitching from PLY files
+
+This repository includes a stitching workflow under [`stitching/`](stitching) for registering and merging multiple
+point clouds exported as `*.ply` files.
+
+#### Input data layout
+
+Put all source point clouds in [`stitching/data/`](stitching/data). The stitching script expects PLY files (`*.ply`),
+for example:
+
+```text
+stitching/
+  data/
+    view_01.ply
+    view_02.ply
+    view_03.ply
+```
+
+#### Run command (complete example)
+
+```shell
+python stitching/stitch_point_clouds.py \
+  --input-dir stitching/data \
+  --pattern "*.ply" \
+  --output-dir stitching/output
+```
+
+#### Output artifacts
+
+The script produces:
+
+* `stitching/output/stitched.ply` - merged point cloud in the target frame.
+* `stitching/output/transforms/transform_XX_to_00.yaml` - estimated transform for each source view to the reference
+  frame.
+
+#### Relevant APIs
+
+The registration step is based on Zivid Toolbox experimental registration APIs:
+
+* `zivid.experimental.toolbox.point_cloud_registration.local_point_cloud_registration`
+* `LocalPointCloudRegistrationParameters`
+
 ## Versioning
 
 This python module is released with the same version number as the Zivid SDK that it supports. The Zivid SDK is using
